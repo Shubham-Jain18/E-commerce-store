@@ -349,14 +349,22 @@ def home(request):
 
 def search(request):
     search = request.GET.get('search')
-    if search:
-        res = Products.objects.filter(Q(product_name=search) | Q(category=search) | Q(sub_category=search))
+
+    if not search:
+        # If the search query is empty, redirect to the home page
+        return redirect('/home/')
+
+    res = Products.objects.filter(Q(product_name=search) | Q(category=search) | Q(sub_category=search))
+
+    if res.exists():
+        # If at least one result is found, get the best match
         best_prod = res[0]
         id = best_prod.product_id
         return ProductView(request, id)
     else:
-        # If not searched, return default posts
-        redirect('/home')
+        # If no results are found, you may want to handle this case differently.
+        # For now, let's redirect to the home page.
+        return redirect('/home/')
 
 def checkout(request):
     # Get the user's address from the customer model
